@@ -14,7 +14,7 @@
     <section class="cards">
 
         <div class="card">
-            <img src="img/armazem.jpg" alt="">
+            <img src="img/armazem.jpg" alt="Restaurante Armazém da Fazenda">
             <h2>Armazém da Fazenda</h2>
 
             <p><strong>Comidas:</strong> Feijoada, arroz, feijão, bife acebolado, frango grelhado, saladas</p>
@@ -26,7 +26,7 @@
         </div>
 
         <div class="card">
-            <img src="img/trento.jpg" alt="">
+            <img src="img/trento.jpg" alt="Restaurante Trento Grill">
             <h2>Trento Grill</h2>
 
             <p><strong>Comidas:</strong> Picanha, churrasco, sushi, massas, lasanha, saladas</p>
@@ -38,7 +38,7 @@
         </div>
 
         <div class="card">
-            <img src="img/labella.jpg" alt="">
+            <img src="img/labella.jpg" alt="restaurante La Bella Pizzaria">
             <h2>La Bella Pizzaria</h2>
 
             <p><strong>Comidas:</strong> Pizzas tradicionais, pizzas especiais, massas, lasanhas</p>
@@ -50,7 +50,7 @@
         </div>
 
         <div class="card">
-            <img src="img/lavitay.jpg" alt="">
+            <img src="img/lavitay.jpg" alt="Restaurante Lavitay Pizzaria">
             <h2>Lavitay Pizzaria</h2>
 
             <p><strong>Comidas:</strong> Pizzas forno a lenha, calzones, massas, lasanhas</p>
@@ -73,7 +73,7 @@
         </div>
 
         <div class="card">
-            <img src="img/yazu.jpg" alt="">
+            <img src="img/yazu.jpg" alt="Restaurante YAZU Sushi">
             <h2>YAZU Sushi</h2>
 
             <p><strong>Comidas:</strong> Sushi, sashimi, temaki, hot roll, yakisoba</p>
@@ -84,7 +84,7 @@
         </div>
 
         <div class="card">
-            <img src="img/boteco.jpg" alt="">
+            <img src="img/boteco.jpg" alt="Restaurante Boteco da Vila">
             <h2>Boteco da Vila</h2>
 
             <p><strong>Comidas:</strong> Pastéis, hambúrgueres, porções, lanches</p>
@@ -95,7 +95,7 @@
         </div>
 
         <div class="card">
-            <img src="img/pinda_burger.jpg" alt="">
+            <img src="img/pinda_burger.jpg" alt="Pinda Burger">
             <h2>Pinda Burger</h2>
 
             <p><strong>Comidas:</strong> Hambúrguer artesanal, hot dog, combos</p>
@@ -106,7 +106,7 @@
         </div>
 
         <div class="card">
-            <img src="img/cafe.jpg" alt="">
+            <img src="img/cafe.jpg" alt="café Central Pinda">
             <h2>Café Central Pinda</h2>
 
             <p><strong>Comidas:</strong> Sanduíches, bolos, salgados, pães de queijo</p>
