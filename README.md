@@ -2,6 +2,9 @@
 
 ## 1. Dados do Projeto
 
+**Dominío do Servidor**
+http://pindaeco.rf.gd/
+
 **Nome dos integrantes:**  
 João Vítor Pereira Paulo, Caio César Barbosa, Lívia Campos, Raquele Chaves Rodrigues  
 
@@ -29,11 +32,6 @@ A plataforma apresenta informações organizadas sobre pontos turísticos, hoté
 
 Além disso, o projeto busca incentivar o turismo local e a valorização dos espaços naturais e urbanos, promovendo uma experiência mais acessível e informativa para os usuários.
 
- 
-
- 
-
- 
 
  
 
