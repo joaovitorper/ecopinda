@@ -6,6 +6,10 @@ error_reporting(E_ALL);
 
 require_once __DIR__ . "/conexao.php";
 
+/* =========================================================
+   VALIDAR ID
+========================================================= */
+
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     die("ID do restaurante não encontrado.");
 }
@@ -15,6 +19,10 @@ $id = (int) $_GET['id'];
 if ($id <= 0) {
     die("ID do restaurante inválido.");
 }
+
+/* =========================================================
+   BUSCAR RESTAURANTE
+========================================================= */
 
 $stmt = mysqli_prepare(
     $conexao,
@@ -38,6 +46,10 @@ $restaurante = mysqli_fetch_assoc($resultado);
 
 mysqli_stmt_close($stmt);
 
+/* =========================================================
+   CATEGORIAS
+========================================================= */
+
 $categorias = [
     'Restaurante',
     'Lanchonete',
@@ -50,14 +62,24 @@ $categorias = [
 $categoriaBanco = trim($restaurante['categoria'] ?? '');
 
 if (in_array($categoriaBanco, $categorias, true)) {
+
     $categoriaSelecionada = $categoriaBanco;
     $categoriaOutro = '';
 } else {
+
     $categoriaSelecionada = 'Outro';
     $categoriaOutro = $categoriaBanco;
 }
 
+/* =========================================================
+   PROCESSAR FORMULÁRIO
+========================================================= */
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    /* =====================================================
+       NOME
+    ===================================================== */
 
     $nome = trim($_POST['nome'] ?? '');
 
@@ -69,6 +91,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die("O nome deve possuir entre 2 e 100 caracteres.");
     }
 
+    /* =====================================================
+       LOGRADOURO
+    ===================================================== */
+
     $logradouro = trim($_POST['logradouro'] ?? '');
 
     if ($logradouro === '') {
@@ -78,6 +104,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (mb_strlen($logradouro) < 3 || mb_strlen($logradouro) > 150) {
         die("O logradouro deve possuir entre 3 e 150 caracteres.");
     }
+
+    /* =====================================================
+       NÚMERO
+    ===================================================== */
 
     $numero = trim($_POST['numero'] ?? '');
 
@@ -91,6 +121,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die("O número deve estar entre 1 e 999999.");
     }
 
+    /* =====================================================
+       CIDADE
+    ===================================================== */
+
     $cidade = trim($_POST['cidade'] ?? '');
 
     if ($cidade === '') {
@@ -101,6 +135,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die("A cidade deve possuir entre 2 e 100 caracteres.");
     }
 
+    /* =====================================================
+       CEP
+    ===================================================== */
+
     $cep = trim($_POST['cep'] ?? '');
 
     if (!preg_match('/^[0-9]{5}-?[0-9]{3}$/', $cep)) {
@@ -109,11 +147,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $cep = preg_replace('/\D/', '', $cep);
 
+    /* =====================================================
+       TELEFONE
+    ===================================================== */
+
     $telefone = trim($_POST['telefone'] ?? '');
 
     if (!preg_match('/^\([0-9]{2}\) [0-9]{5}-[0-9]{4}$/', $telefone)) {
         die("Digite um telefone válido. Exemplo: (11) 12345-6789.");
     }
+
+    /* =====================================================
+       E-MAIL
+    ===================================================== */
 
     $email = trim($_POST['email'] ?? '');
 
@@ -124,6 +170,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (mb_strlen($email) > 150) {
         die("O e-mail deve possuir no máximo 150 caracteres.");
     }
+
+    /* =====================================================
+       CATEGORIA
+    ===================================================== */
 
     $categoria = trim($_POST['categoria'] ?? '');
 
@@ -149,6 +199,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $categoria = $categoriaOutro;
     }
 
+    /* =====================================================
+       DELIVERY
+    ===================================================== */
+
     $possui_delivery = $_POST['possui_delivery'] ?? '';
 
     if (!in_array($possui_delivery, ['0', '1'], true)) {
@@ -157,6 +211,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $possui_delivery = (int) $possui_delivery;
 
+    /* =====================================================
+       WI-FI
+    ===================================================== */
+
     $possui_wifi = $_POST['possui_wifi'] ?? '';
 
     if (!in_array($possui_wifi, ['0', '1'], true)) {
@@ -164,6 +222,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $possui_wifi = (int) $possui_wifi;
+
+    /* =====================================================
+       HORÁRIO
+    ===================================================== */
 
     $horario = trim($_POST['horario_funcionamento'] ?? '');
 
@@ -175,11 +237,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die("O horário deve possuir entre 3 e 100 caracteres.");
     }
 
-    $imagem = $restaurante['imagem'] ?? '';
+    /* =====================================================
+       IMAGEM ATUAL
+       
+       IMPORTANTE:
+       O banco guarda SOMENTE o nome do arquivo.
+       Exemplo:
+       restaurante_123.jpg
+    ===================================================== */
 
-    if ($imagem !== '') {
-        $imagem = basename($imagem);
-    }
+    $imagem = basename($restaurante['imagem'] ?? '');
+
+    /* =====================================================
+       UPLOAD DE NOVA IMAGEM
+    ===================================================== */
 
     if (
         isset($_FILES['foto']) &&
@@ -190,23 +261,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             die("Erro ao enviar a imagem.");
         }
 
+        /* ================================================
+           TAMANHO
+        ================================================= */
+
         if ($_FILES['foto']['size'] > 5 * 1024 * 1024) {
             die("A imagem deve ter no máximo 5 MB.");
         }
 
+        /* ================================================
+           TIPOS PERMITIDOS
+        ================================================= */
+
         $tiposPermitidos = [
             'image/jpeg' => 'jpg',
-            'image/png' => 'png',
+            'image/png'  => 'png',
             'image/webp' => 'webp'
         ];
+
+        /* ================================================
+           VERIFICAR MIME TYPE
+        ================================================= */
 
         if (class_exists('finfo')) {
 
             $finfo = new finfo(FILEINFO_MIME_TYPE);
+
             $tipoImagem = $finfo->file(
                 $_FILES['foto']['tmp_name']
             );
-
         } else {
 
             $tipoImagem = $_FILES['foto']['type'] ?? '';
@@ -216,14 +299,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             die("A imagem deve ser JPG, PNG ou WEBP.");
         }
 
+        /* ================================================
+           EXTENSÃO
+        ================================================= */
+
         $extensao = $tiposPermitidos[$tipoImagem];
+
+        /* ================================================
+           GERAR NOME ÚNICO
+        ================================================= */
 
         $nomeImagem = uniqid(
             'restaurante_',
             true
         ) . '.' . $extensao;
 
-        $pasta = __DIR__ . "/../assets/img/imgGastronomia/";
+        /* ================================================
+           PASTA DE IMAGENS
+        ================================================= */
+
+        $pasta = __DIR__ . "/../assets/img/img/Gastronomia/";
 
         if (!is_dir($pasta)) {
 
@@ -232,7 +327,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
+        /* ================================================
+           CAMINHO FINAL
+        ================================================= */
+
         $destino = $pasta . $nomeImagem;
+
+        /* ================================================
+           MOVER ARQUIVO
+        ================================================= */
 
         if (!move_uploaded_file(
             $_FILES['foto']['tmp_name'],
@@ -241,8 +344,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             die("Não foi possível salvar a imagem.");
         }
 
+        /* ================================================
+           SALVAR SOMENTE O NOME NO BANCO
+        ================================================= */
+
         $imagem = $nomeImagem;
     }
+
+    /* =====================================================
+       ATUALIZAR BANCO
+    ===================================================== */
 
     $sql = "UPDATE restaurante SET
         nome = ?,
@@ -262,15 +373,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = mysqli_prepare($conexao, $sql);
 
     if (!$stmt) {
-        die(
-            "Erro ao preparar atualização: " .
-            mysqli_error($conexao)
-        );
+        die("Erro ao preparar atualização: " .
+            mysqli_error($conexao));
     }
 
     mysqli_stmt_bind_param(
         $stmt,
-        "ssisssssiiisi",
+        "ssisssssiissi",
         $nome,
         $logradouro,
         $numero,
@@ -287,26 +396,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     );
 
     if (!mysqli_stmt_execute($stmt)) {
-        die(
-            "Erro ao editar restaurante: " .
-            mysqli_stmt_error($stmt)
-        );
+        die("Erro ao editar restaurante: " .
+            mysqli_stmt_error($stmt));
     }
 
     mysqli_stmt_close($stmt);
+
+    /* =====================================================
+       VOLTAR PARA GASTRONOMIA
+    ===================================================== */
 
     header("Location: ../pages/restaurante.php");
     exit();
 }
 
+/* =========================================================
+   DADOS PARA EXIBIÇÃO DO FORMULÁRIO
+========================================================= */
+
 $horarioFuncionamento =
     $restaurante['horario_funcionamento'] ?? '';
 
-$imagemAtual = $restaurante['imagem'] ?? '';
-
-if ($imagemAtual !== '') {
-    $imagemAtual = basename($imagemAtual);
-}
+/*
+ * IMPORTANTE:
+ * Pega somente o nome da imagem.
+ */
+$imagemAtual = basename(
+    $restaurante['imagem'] ?? ''
+);
 
 ?>
 
@@ -331,367 +448,446 @@ if ($imagemAtual !== '') {
 
 <body>
 
-<div class="container">
+    <div class="container">
 
-    <h1>Editar Restaurante</h1>
+        <h1>Editar Restaurante</h1>
 
-    <form
-        method="POST"
-        enctype="multipart/form-data">
+        <form
+            method="POST"
+            enctype="multipart/form-data">
 
-        <label for="foto">
-            Foto do Restaurante:
-        </label>
+            <!-- =================================================
+             FOTO
+        ================================================== -->
 
-        <?php if ($imagemAtual !== ''): ?>
+            <label for="foto">
+                Foto do Restaurante:
+            </label>
 
-            <img
-                src="../assets/img/imgGastronomia/<?= htmlspecialchars($imagemAtual, ENT_QUOTES, 'UTF-8') ?>"
-                alt="Foto atual do restaurante"
-                width="250"
-            >
+            <?php if ($imagemAtual !== ''): ?>
 
-            <small>
-                Escolha uma nova foto para substituir a atual.
-            </small>
+                <div class="imagem-atual">
 
-        <?php else: ?>
+                    <img
+                        src="../assets/img/img/Gastronomia/<?= htmlspecialchars($imagemAtual, ENT_QUOTES, 'UTF-8') ?>"
+                        alt="Foto atual do restaurante"
+                        width="250">
 
-            <small>
-                Este restaurante ainda não possui uma foto.
-            </small>
+                    <small>
+                        Esta é a foto atual do restaurante.
+                        Escolha uma nova foto somente se quiser substituí-la.
+                    </small>
 
-        <?php endif; ?>
+                </div>
 
-        <input
-            type="file"
-            id="foto"
-            name="foto"
-            accept=".jpg,.jpeg,.png,.webp">
+            <?php else: ?>
 
-        <label for="nome">
-            Nome:
-        </label>
+                <div class="sem-imagem">
 
-        <input
-            type="text"
-            id="nome"
-            name="nome"
-            value="<?= htmlspecialchars($restaurante['nome'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-            required
-            minlength="2"
-            maxlength="100"
-            placeholder="Nome do restaurante">
+                    <small>
+                        Este restaurante ainda não possui uma foto.
+                    </small>
 
-        <label for="logradouro">
-            Logradouro:
-        </label>
+                </div>
 
-        <input
-            type="text"
-            id="logradouro"
-            name="logradouro"
-            value="<?= htmlspecialchars($restaurante['logradouro'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-            required
-            minlength="3"
-            maxlength="150"
-            placeholder="Rua, avenida...">
+            <?php endif; ?>
 
-        <label for="numero">
-            Número:
-        </label>
+            <input
+                type="file"
+                id="foto"
+                name="foto"
+                accept=".jpg,.jpeg,.png,.webp">
 
-        <input
-            type="number"
-            id="numero"
-            name="numero"
-            value="<?= htmlspecialchars($restaurante['numero'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-            required
-            min="1"
-            max="999999"
-            placeholder="Número">
+            <!-- =================================================
+             NOME
+        ================================================== -->
 
-        <label for="cidade">
-            Cidade:
-        </label>
-
-        <input
-            type="text"
-            id="cidade"
-            name="cidade"
-            value="<?= htmlspecialchars($restaurante['cidade'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-            required
-            minlength="2"
-            maxlength="100"
-            placeholder="Cidade">
-
-        <label for="cep">
-            CEP:
-        </label>
-
-        <input
-            type="text"
-            id="cep"
-            name="cep"
-            value="<?= htmlspecialchars($restaurante['cep'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-            required
-            maxlength="9"
-            pattern="[0-9]{5}-?[0-9]{3}"
-            placeholder="12345-678">
-
-        <label for="telefone">
-            Telefone:
-        </label>
-
-        <input
-            type="text"
-            id="telefone"
-            name="telefone"
-            value="<?= htmlspecialchars($restaurante['telefone'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-            required
-            pattern="\([0-9]{2}\) [0-9]{5}-[0-9]{4}"
-            placeholder="(11) 12345-6789">
-
-        <label for="email">
-            E-mail:
-        </label>
-
-        <input
-            type="email"
-            id="email"
-            name="email"
-            value="<?= htmlspecialchars($restaurante['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-            required
-            maxlength="150"
-            placeholder="exemplo@email.com">
-
-        <label for="categoria">
-            Categoria:
-        </label>
-
-        <select
-            id="categoria"
-            name="categoria"
-            required
-            onchange="mostrarOutraCategoria()">
-
-            <option value="">
-                Selecione uma categoria
-            </option>
-
-            <?php foreach ($categorias as $categoria): ?>
-
-                <option
-                    value="<?= htmlspecialchars($categoria, ENT_QUOTES, 'UTF-8') ?>"
-                    <?= $categoriaSelecionada === $categoria ? 'selected' : '' ?>>
-
-                    <?= htmlspecialchars($categoria, ENT_QUOTES, 'UTF-8') ?>
-
-                </option>
-
-            <?php endforeach; ?>
-
-        </select>
-
-        <div
-            id="outra_categoria"
-            style="<?= $categoriaSelecionada === 'Outro'
-                ? 'display:block;'
-                : 'display:none;' ?>">
-
-            <label for="categoria_outro">
-                Digite a categoria:
+            <label for="nome">
+                Nome:
             </label>
 
             <input
                 type="text"
-                id="categoria_outro"
-                name="categoria_outro"
-                value="<?= htmlspecialchars($categoriaOutro, ENT_QUOTES, 'UTF-8') ?>"
+                id="nome"
+                name="nome"
+                value="<?= htmlspecialchars($restaurante['nome'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                required
                 minlength="2"
-                maxlength="50"
-                placeholder="Digite a categoria"
-                <?= $categoriaSelecionada === 'Outro'
-                    ? 'required'
-                    : '' ?>>
+                maxlength="100"
+                placeholder="Nome do restaurante">
 
-        </div>
+            <!-- =================================================
+             LOGRADOURO
+        ================================================== -->
 
-        <label for="possui_delivery">
-            Possui Delivery?
-        </label>
+            <label for="logradouro">
+                Logradouro:
+            </label>
 
-        <select
-            id="possui_delivery"
-            name="possui_delivery"
-            required>
+            <input
+                type="text"
+                id="logradouro"
+                name="logradouro"
+                value="<?= htmlspecialchars($restaurante['logradouro'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                required
+                minlength="3"
+                maxlength="150"
+                placeholder="Rua, avenida...">
 
-            <option value="">
-                Selecione
-            </option>
+            <!-- =================================================
+             NÚMERO
+        ================================================== -->
 
-            <option
-                value="1"
-                <?= (string)$restaurante['possui_delivery'] === '1'
-                    ? 'selected'
-                    : '' ?>>
-                Sim
-            </option>
+            <label for="numero">
+                Número:
+            </label>
 
-            <option
-                value="0"
-                <?= (string)$restaurante['possui_delivery'] === '0'
-                    ? 'selected'
-                    : '' ?>>
-                Não
-            </option>
+            <input
+                type="number"
+                id="numero"
+                name="numero"
+                value="<?= htmlspecialchars($restaurante['numero'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                required
+                min="1"
+                max="999999"
+                placeholder="Número">
 
-        </select>
+            <!-- =================================================
+             CIDADE
+        ================================================== -->
 
-        <label for="possui_wifi">
-            Possui Wi-Fi?
-        </label>
+            <label for="cidade">
+                Cidade:
+            </label>
 
-        <select
-            id="possui_wifi"
-            name="possui_wifi"
-            required>
+            <input
+                type="text"
+                id="cidade"
+                name="cidade"
+                value="<?= htmlspecialchars($restaurante['cidade'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                required
+                minlength="2"
+                maxlength="100"
+                placeholder="Cidade">
 
-            <option value="">
-                Selecione
-            </option>
+            <!-- =================================================
+             CEP
+        ================================================== -->
 
-            <option
-                value="1"
-                <?= (string)$restaurante['possui_wifi'] === '1'
-                    ? 'selected'
-                    : '' ?>>
-                Sim
-            </option>
+            <label for="cep">
+                CEP:
+            </label>
 
-            <option
-                value="0"
-                <?= (string)$restaurante['possui_wifi'] === '0'
-                    ? 'selected'
-                    : '' ?>>
-                Não
-            </option>
+            <input
+                type="text"
+                id="cep"
+                name="cep"
+                value="<?= htmlspecialchars($restaurante['cep'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                required
+                maxlength="9"
+                pattern="[0-9]{5}-?[0-9]{3}"
+                placeholder="12345-678">
 
-        </select>
+            <!-- =================================================
+             TELEFONE
+        ================================================== -->
 
-        <label for="horario_funcionamento">
-            Horário de Funcionamento:
-        </label>
+            <label for="telefone">
+                Telefone:
+            </label>
 
-        <input
-            type="text"
-            id="horario_funcionamento"
-            name="horario_funcionamento"
-            value="<?= htmlspecialchars($horarioFuncionamento, ENT_QUOTES, 'UTF-8') ?>"
-            required
-            minlength="3"
-            maxlength="100"
-            placeholder="Ex: Segunda a sábado, das 08:00 às 18:00">
+            <input
+                type="text"
+                id="telefone"
+                name="telefone"
+                value="<?= htmlspecialchars($restaurante['telefone'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                required
+                pattern="\([0-9]{2}\) [0-9]{5}-[0-9]{4}"
+                placeholder="(11) 12345-6789">
 
-        <div class="botoes">
+            <!-- =================================================
+             E-MAIL
+        ================================================== -->
 
-            <button type="submit">
-                Salvar Alterações
-            </button>
+            <label for="email">
+                E-mail:
+            </label>
 
-            <a
-                href="../pages/restaurante.php"
-                class="botao-voltar">
-                Voltar
-            </a>
+            <input
+                type="email"
+                id="email"
+                name="email"
+                value="<?= htmlspecialchars($restaurante['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                required
+                maxlength="150"
+                placeholder="exemplo@email.com">
 
-        </div>
+            <!-- =================================================
+             CATEGORIA
+        ================================================== -->
 
-    </form>
+            <label for="categoria">
+                Categoria:
+            </label>
 
-</div>
+            <select
+                id="categoria"
+                name="categoria"
+                required
+                onchange="mostrarOutraCategoria()">
 
-<script>
+                <option value="">
+                    Selecione uma categoria
+                </option>
 
-function mostrarOutraCategoria() {
+                <?php foreach ($categorias as $categoria): ?>
 
-    const categoria =
-        document.getElementById('categoria');
+                    <option
+                        value="<?= htmlspecialchars($categoria, ENT_QUOTES, 'UTF-8') ?>"
+                        <?= $categoriaSelecionada === $categoria ? 'selected' : '' ?>>
 
-    const outra =
-        document.getElementById('outra_categoria');
+                        <?= htmlspecialchars($categoria, ENT_QUOTES, 'UTF-8') ?>
 
-    const campo =
-        document.getElementById('categoria_outro');
+                    </option>
 
-    if (categoria.value === 'Outro') {
+                <?php endforeach; ?>
 
-        outra.style.display = 'block';
+            </select>
 
-        campo.required = true;
+            <!-- =================================================
+             OUTRA CATEGORIA
+        ================================================== -->
 
-    } else {
+            <div
+                id="outra_categoria"
+                style="<?= $categoriaSelecionada === 'Outro'
+                            ? 'display:block;'
+                            : 'display:none;' ?>">
 
-        outra.style.display = 'none';
+                <label for="categoria_outro">
+                    Digite a categoria:
+                </label>
 
-        campo.required = false;
+                <input
+                    type="text"
+                    id="categoria_outro"
+                    name="categoria_outro"
+                    value="<?= htmlspecialchars($categoriaOutro, ENT_QUOTES, 'UTF-8') ?>"
+                    minlength="2"
+                    maxlength="50"
+                    placeholder="Digite a categoria"
+                    <?= $categoriaSelecionada === 'Outro'
+                        ? 'required'
+                        : '' ?>>
 
-        campo.value = '';
-    }
-}
+            </div>
 
-document
-    .getElementById('cep')
-    .addEventListener('blur', function () {
+            <!-- =================================================
+             DELIVERY
+        ================================================== -->
 
-        const cep =
-            this.value.replace(/\D/g, '');
+            <label for="possui_delivery">
+                Possui Delivery?
+            </label>
 
-        if (cep.length !== 8) {
-            return;
+            <select
+                id="possui_delivery"
+                name="possui_delivery"
+                required>
+
+                <option value="">
+                    Selecione
+                </option>
+
+                <option
+                    value="1"
+                    <?= (string)$restaurante['possui_delivery'] === '1'
+                        ? 'selected'
+                        : '' ?>>
+                    Sim
+                </option>
+
+                <option
+                    value="0"
+                    <?= (string)$restaurante['possui_delivery'] === '0'
+                        ? 'selected'
+                        : '' ?>>
+                    Não
+                </option>
+
+            </select>
+
+            <!-- =================================================
+             WI-FI
+        ================================================== -->
+
+            <label for="possui_wifi">
+                Possui Wi-Fi?
+            </label>
+
+            <select
+                id="possui_wifi"
+                name="possui_wifi"
+                required>
+
+                <option value="">
+                    Selecione
+                </option>
+
+                <option
+                    value="1"
+                    <?= (string)$restaurante['possui_wifi'] === '1'
+                        ? 'selected'
+                        : '' ?>>
+                    Sim
+                </option>
+
+                <option
+                    value="0"
+                    <?= (string)$restaurante['possui_wifi'] === '0'
+                        ? 'selected'
+                        : '' ?>>
+                    Não
+                </option>
+
+            </select>
+
+            <!-- =================================================
+             HORÁRIO
+        ================================================== -->
+
+            <label for="horario_funcionamento">
+                Horário de Funcionamento:
+            </label>
+
+            <input
+                type="text"
+                id="horario_funcionamento"
+                name="horario_funcionamento"
+                value="<?= htmlspecialchars($horarioFuncionamento, ENT_QUOTES, 'UTF-8') ?>"
+                required
+                minlength="3"
+                maxlength="100"
+                placeholder="Ex: Segunda a sábado, das 08:00 às 18:00">
+
+            <!-- =================================================
+             BOTÕES
+        ================================================== -->
+
+            <div class="botoes">
+
+                <button type="submit">
+                    Salvar Alterações
+                </button>
+
+                <a
+                    href="../pages/restaurante.php"
+                    class="botao-voltar">
+                    Voltar
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+    <script>
+        /* =========================================================
+   MOSTRAR / ESCONDER OUTRA CATEGORIA
+========================================================= */
+
+        function mostrarOutraCategoria() {
+
+            const categoria =
+                document.getElementById('categoria');
+
+            const outra =
+                document.getElementById('outra_categoria');
+
+            const campo =
+                document.getElementById('categoria_outro');
+
+            if (categoria.value === 'Outro') {
+
+                outra.style.display = 'block';
+
+                campo.required = true;
+
+            } else {
+
+                outra.style.display = 'none';
+
+                campo.required = false;
+
+                campo.value = '';
+            }
         }
 
-        fetch(
-            'https://viacep.com.br/ws/' +
-            cep +
-            '/json/'
-        )
-        .then(function (response) {
 
-            if (!response.ok) {
-                throw new Error('Erro na consulta.');
-            }
+        /* =========================================================
+           VIA CEP
+        ========================================================= */
 
-            return response.json();
+        document
+            .getElementById('cep')
+            .addEventListener('blur', function() {
 
-        })
-        .then(function (data) {
+                const cep =
+                    this.value.replace(/\D/g, '');
 
-            if (data.erro) {
+                if (cep.length !== 8) {
+                    return;
+                }
 
-                alert('CEP não encontrado.');
+                fetch(
+                        'https://viacep.com.br/ws/' +
+                        cep +
+                        '/json/'
+                    )
 
-                return;
-            }
+                    .then(function(response) {
 
-            document.getElementById('logradouro').value =
-                data.logradouro || '';
+                        if (!response.ok) {
+                            throw new Error('Erro na consulta.');
+                        }
 
-            document.getElementById('cidade').value =
-                data.localidade || '';
+                        return response.json();
 
-        })
-        .catch(function () {
+                    })
 
-            alert('Erro ao consultar o CEP.');
+                    .then(function(data) {
 
-        });
+                        if (data.erro) {
 
-    });
+                            alert('CEP não encontrado.');
 
-mostrarOutraCategoria();
+                            return;
+                        }
 
-</script>
+                        document.getElementById('logradouro').value =
+                            data.logradouro || '';
+
+                        document.getElementById('cidade').value =
+                            data.localidade || '';
+
+                    })
+
+                    .catch(function() {
+
+                        alert('Erro ao consultar o CEP.');
+
+                    });
+
+            });
+
+
+        /* =========================================================
+           INICIALIZAR CATEGORIA
+        ========================================================= */
+
+        mostrarOutraCategoria();
+    </script>
 
 </body>
 

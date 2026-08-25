@@ -52,7 +52,7 @@ if (!$result) {
             <?php if (!empty($row['imagem'])): ?>
 
                 <img
-                    src="../<?= htmlspecialchars($row['imagem']) ?>"
+                    src="../assets/img/img/Gastronomia/<?= htmlspecialchars(basename($row['imagem'])) ?>"
                     alt="<?= htmlspecialchars($row['nome']) ?>"
                 >
 
