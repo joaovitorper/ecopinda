@@ -35,9 +35,9 @@ session_start();
                     type="text"
                     id="nome"
                     name="nome"
-                    required
+                    
                     minlength="2"
-                    maxlength="100"
+                    maxlength="150"
                     pattern=".*\S.*"
                     title="Digite o nome do restaurante (2 a 100 caracteres).">
 
@@ -48,7 +48,7 @@ session_start();
                     name="logradouro"
                     required
                     minlength="3"
-                    maxlength="150"
+                    maxlength="255"
                     pattern=".*\S.*"
                     title="Digite um logradouro válido.">
 
@@ -96,8 +96,7 @@ session_start();
                     type="email"
                     id="email"
                     name="email"
-                    required
-                    maxlength="150"
+                    maxlength="100"
                     placeholder="exemplo@email.com">
 
                 <label for="categoria">Categoria:</label>
