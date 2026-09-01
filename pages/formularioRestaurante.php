@@ -35,7 +35,7 @@ session_start();
                     type="text"
                     id="nome"
                     name="nome"
-                    
+
                     minlength="2"
                     maxlength="150"
                     pattern=".*\S.*"
@@ -53,6 +53,7 @@ session_start();
                     title="Digite um logradouro válido.">
 
                 <label for="numero">Número:</label>
+                <!-- Parei aqui -->
                 <input
                     type="number"
                     id="numero"
@@ -67,7 +68,6 @@ session_start();
                     type="text"
                     id="cidade"
                     name="cidade"
-                    required
                     minlength="2"
                     maxlength="100"
                     pattern=".*\S.*"
@@ -104,7 +104,6 @@ session_start();
                 <select
                     id="categoria"
                     name="categoria"
-                    required
                     onchange="mostrarOutraCategoria()">
 
                     <option value="">Selecione uma categoria</option>
@@ -153,8 +152,7 @@ session_start();
 
                 <select
                     id="possui_wifi"
-                    name="possui_wifi"
-                    required>
+                    name="possui_wifi">
 
                     <option value="">Selecione</option>
                     <option value="1">Sim</option>
